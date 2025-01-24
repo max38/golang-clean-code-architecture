@@ -4,7 +4,9 @@ import (
 	config "github.com/max38/golang-clean-code-architecture/src/config"
 	entities "github.com/max38/golang-clean-code-architecture/src/domain/entities"
 	gofiberserver "github.com/max38/golang-clean-code-architecture/src/infrastructure/gofiber/server"
+	postgresconstituencyrepository "github.com/max38/golang-clean-code-architecture/src/interface/repositories/postgres/constituency"
 	postgresuserrepository "github.com/max38/golang-clean-code-architecture/src/interface/repositories/postgres/user"
+	constituencyusecase "github.com/max38/golang-clean-code-architecture/src/usecases/constituency"
 	userusecase "github.com/max38/golang-clean-code-architecture/src/usecases/user"
 )
 
@@ -21,11 +23,17 @@ import (
 func main() {
 	config.Load(".env.dev")
 
+	// User
 	var userRepository = postgresuserrepository.UserRepository()
 	var userUsecase = userusecase.UserUsecase(userRepository)
 
+	// Constituency
+	var constituencyRepository = postgresconstituencyrepository.ConstituencyRepository()
+	var constituencyUsecase = constituencyusecase.ConstituencyUsecase(constituencyRepository)
+
 	var applicationEntity = entities.ApplicationEntity{
-		UserUsecase: userUsecase,
+		UserUsecase:         userUsecase,
+		ConstituencyUsecase: constituencyUsecase,
 	}
 
 	var server gofiberserver.IServer = gofiberserver.NewServer(applicationEntity)

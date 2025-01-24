@@ -3,6 +3,7 @@ package gofiberserver
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	gofiberconstituencyhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/constituency"
 	gofibercrudhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/crud"
 	gofibermonitorhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/monitor"
 	gofiberuserhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/user"
@@ -14,6 +15,7 @@ import (
 type IModuleFactory interface {
 	MonitorModule()
 	UsersModule()
+	ConstituencyModule()
 	SwaggerModule()
 	CRUDModule()
 }
@@ -70,6 +72,18 @@ func (m *moduleFactory) UsersModule() {
 
 	router.Post("/profile", m.middlewares.JwtAuth(m.server.application.UserUsecase), userHandler.GetUserProfile)
 
+}
+
+func (m *moduleFactory) ConstituencyModule() {
+	var constituencyHandler = gofiberconstituencyhandler.ConstituencyHandler(m.server.application.ConstituencyUsecase)
+
+	var router = m.router.Group("/constituencies")
+
+	router.Get("/", constituencyHandler.GetConstituencies)
+	router.Get("/:id", constituencyHandler.GetConstituencyByConstituencyId)
+	router.Post("/", constituencyHandler.CreateConstituency)
+	router.Put("/", constituencyHandler.UpdateConstituency)
+	router.Delete("/:id", constituencyHandler.DeleteConstituency)
 }
 
 func (m *moduleFactory) CRUDModule() {

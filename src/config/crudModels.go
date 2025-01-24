@@ -10,6 +10,7 @@ var EntitiyModels = []entities.ICRUDDataModel{
 	&entitymodels.UserModel{},
 	&entitymodels.UserTokenModel{},
 	&entitymodels.UserPermissionModel{},
+	&entitymodels.ConstituencyModel{},
 
 	// MongoDB
 }
