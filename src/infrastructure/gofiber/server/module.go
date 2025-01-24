@@ -3,6 +3,7 @@ package gofiberserver
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	gofibercandidatehandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/candidate"
 	gofiberconstituencyhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/constituency"
 	gofibercrudhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/crud"
 	gofibermonitorhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/monitor"
@@ -16,6 +17,7 @@ type IModuleFactory interface {
 	MonitorModule()
 	UsersModule()
 	ConstituencyModule()
+	CandidateModule()
 	SwaggerModule()
 	CRUDModule()
 }
@@ -84,6 +86,20 @@ func (m *moduleFactory) ConstituencyModule() {
 	router.Post("/", constituencyHandler.CreateConstituency)
 	router.Put("/", constituencyHandler.UpdateConstituency)
 	router.Delete("/:id", constituencyHandler.DeleteConstituency)
+}
+
+func (m *moduleFactory) CandidateModule() {
+
+	var candidateHandler = gofibercandidatehandler.CandidateHandler(m.server.application.CandidateUsecase)
+
+	var router = m.router.Group("/candidates")
+
+	router.Get("/", candidateHandler.GetCandidates)
+	router.Get("/:id", candidateHandler.GetCandidateByCandidateId)
+	router.Get("/constituency/:id", candidateHandler.GetCandidatesByConstituencyId)
+	router.Post("/", candidateHandler.CreateCandidate)
+	router.Put("/", candidateHandler.UpdateCandidate)
+	router.Delete("/:id", candidateHandler.DeleteCandidate)
 }
 
 func (m *moduleFactory) CRUDModule() {

@@ -46,6 +46,7 @@ func (s *gofiberServer) Start() {
 	modules.MonitorModule()
 	modules.UsersModule()
 	modules.ConstituencyModule()
+	modules.CandidateModule()
 	modules.SwaggerModule()
 	modules.CRUDModule()
 

@@ -4,8 +4,10 @@ import (
 	config "github.com/max38/golang-clean-code-architecture/src/config"
 	entities "github.com/max38/golang-clean-code-architecture/src/domain/entities"
 	gofiberserver "github.com/max38/golang-clean-code-architecture/src/infrastructure/gofiber/server"
+	postgrescandidaterepository "github.com/max38/golang-clean-code-architecture/src/interface/repositories/postgres/candidate"
 	postgresconstituencyrepository "github.com/max38/golang-clean-code-architecture/src/interface/repositories/postgres/constituency"
 	postgresuserrepository "github.com/max38/golang-clean-code-architecture/src/interface/repositories/postgres/user"
+	candidateusecase "github.com/max38/golang-clean-code-architecture/src/usecases/candidate"
 	constituencyusecase "github.com/max38/golang-clean-code-architecture/src/usecases/constituency"
 	userusecase "github.com/max38/golang-clean-code-architecture/src/usecases/user"
 )
@@ -31,9 +33,14 @@ func main() {
 	var constituencyRepository = postgresconstituencyrepository.ConstituencyRepository()
 	var constituencyUsecase = constituencyusecase.ConstituencyUsecase(constituencyRepository)
 
+	// Candidate
+	var candidateRepository = postgrescandidaterepository.CandidateRepository()
+	var candidateUsecase = candidateusecase.CandidateUsecase(candidateRepository)
+
 	var applicationEntity = entities.ApplicationEntity{
 		UserUsecase:         userUsecase,
 		ConstituencyUsecase: constituencyUsecase,
+		CandidateUsecase:    candidateUsecase,
 	}
 
 	var server gofiberserver.IServer = gofiberserver.NewServer(applicationEntity)
