@@ -85,9 +85,9 @@ func (m *moduleFactory) ConstituencyModule() {
 
 	router.Get("/", constituencyHandler.GetConstituencies)
 	router.Get("/:id", constituencyHandler.GetConstituencyByConstituencyId)
-	router.Post("/", constituencyHandler.CreateConstituency)
-	router.Put("/", constituencyHandler.UpdateConstituency)
-	router.Delete("/:id", constituencyHandler.DeleteConstituency)
+	router.Post("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), constituencyHandler.CreateConstituency)
+	router.Put("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), constituencyHandler.UpdateConstituency)
+	router.Delete("/:id", m.middlewares.JwtAuth(m.server.application.UserUsecase), constituencyHandler.DeleteConstituency)
 }
 
 func (m *moduleFactory) CandidateModule() {
@@ -99,9 +99,9 @@ func (m *moduleFactory) CandidateModule() {
 	router.Get("/", candidateHandler.GetCandidates)
 	router.Get("/:id", candidateHandler.GetCandidateByCandidateId)
 	router.Get("/constituency/:id", candidateHandler.GetCandidatesByConstituencyId)
-	router.Post("/", candidateHandler.CreateCandidate)
-	router.Put("/", candidateHandler.UpdateCandidate)
-	router.Delete("/:id", candidateHandler.DeleteCandidate)
+	router.Post("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), candidateHandler.CreateCandidate)
+	router.Put("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), candidateHandler.UpdateCandidate)
+	router.Delete("/:id", m.middlewares.JwtAuth(m.server.application.UserUsecase), candidateHandler.DeleteCandidate)
 }
 
 func (m *moduleFactory) VoteModule() {
@@ -109,7 +109,7 @@ func (m *moduleFactory) VoteModule() {
 
 	var router = m.router.Group("/votes")
 
-	router.Get("/constituency/:id", m.middlewares.JwtAuth(m.server.application.UserUsecase), voteHandler.GetVotesByConstituencyId)
+	router.Get("/constituency/:id", voteHandler.GetVotesByConstituencyId)
 	router.Post("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), voteHandler.CreateVote)
 }
 
