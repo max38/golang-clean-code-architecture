@@ -8,6 +8,8 @@ services:
       POSTGRES_PASSWORD: golang-first-api
     ports:
       - "5432:5432"
+    volumes:
+      - ./data/db/:/var/lib/postgresql/data/
 
   mongodb:
     image: mongo:6.0.8
@@ -16,4 +18,6 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: golang-first-api
+    volumes:
+      - ./data/mongodb/:/data/db
 
