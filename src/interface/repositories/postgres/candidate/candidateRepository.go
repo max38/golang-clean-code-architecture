@@ -18,7 +18,7 @@ func CandidateRepository() repositories.ICandidateRepository {
 	}
 }
 
-func (u *candidateRepository) GetGetCandidates() (*[]entitymodels.CandidateModel, error) {
+func (u *candidateRepository) GetCandidates() (*[]entitymodels.CandidateModel, error) {
 	var dbConnector = u.dbHandler.GetConnector()
 
 	var constituenciesModel = []entitymodels.CandidateModel{}

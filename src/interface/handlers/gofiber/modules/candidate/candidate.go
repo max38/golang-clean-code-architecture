@@ -46,7 +46,7 @@ func CandidateHandler(candidateUsecase candidateusecase.ICandidateUsecase) ICand
 // @Router /api/v1/candidates [get]
 func (h *candidateHandler) GetCandidates(c *fiber.Ctx) error {
 	// Pass through Use Case
-	candidates, err := h.candidateUsecase.GetGetCandidates()
+	candidates, err := h.candidateUsecase.GetCandidates()
 	if err != nil {
 		return gofiberentities.NewResponse(c).Error(
 			fiber.ErrBadRequest.Code,

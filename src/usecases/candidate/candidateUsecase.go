@@ -6,7 +6,7 @@ import (
 )
 
 type ICandidateUsecase interface {
-	GetGetCandidates() (*[]entitycandidate.CandidateEntity, error)
+	GetCandidates() (*[]entitycandidate.CandidateEntity, error)
 	GetCandidateByCandidateId(candidateId uint) (*entitycandidate.CandidateEntity, error)
 	GetCandidateByConstituencyId(constituencyId uint) (*[]entitycandidate.CandidateEntity, error)
 	CreateCandidate(candidateCreateRequest *entitycandidate.CandidateCreateRequest) (*entitycandidate.CandidateEntity, error)
@@ -24,8 +24,8 @@ func CandidateUsecase(candidateRepository repositories.ICandidateRepository) ICa
 	}
 }
 
-func (u *candidateUsecase) GetGetCandidates() (*[]entitycandidate.CandidateEntity, error) {
-	var constituenciesEntity, err = u.candidateRepository.GetGetCandidates()
+func (u *candidateUsecase) GetCandidates() (*[]entitycandidate.CandidateEntity, error) {
+	var constituenciesEntity, err = u.candidateRepository.GetCandidates()
 	if err != nil {
 		return nil, err
 	}

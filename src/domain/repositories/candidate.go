@@ -6,7 +6,7 @@ import (
 )
 
 type ICandidateRepository interface {
-	GetGetCandidates() (*[]entitymodels.CandidateModel, error)
+	GetCandidates() (*[]entitymodels.CandidateModel, error)
 	GetCandidateByCandidateId(candidateId uint) (*entitymodels.CandidateModel, error)
 	GetCandidateByConstituencyId(constituencyId uint) (*[]entitymodels.CandidateModel, error)
 	InsertCandidate(candidateRegisterRequest *entitycandidate.CandidateCreateRequest) (*entitycandidate.CandidateEntity, error)
