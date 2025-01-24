@@ -1,6 +1,8 @@
 package gofibervotehandler
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 
 	entityuser "github.com/max38/golang-clean-code-architecture/src/domain/entities/user"
@@ -17,6 +19,7 @@ const (
 )
 
 type IVoteHandler interface {
+	GetVotesByConstituencyId(c *fiber.Ctx) error
 	CreateVote(c *fiber.Ctx) error
 }
 
@@ -30,6 +33,73 @@ func VoteHandler(voteUsecase voteusecase.IVoteUsecase, candidateUsecase candidat
 		voteUsecase:      voteUsecase,
 		candidateUsecase: candidateUsecase,
 	}
+}
+
+// GetVotesByConstituencyId godoc
+// @Summary Get Votes by Constituency Id
+// @Description Get Votes by Constituency Id
+// @Tags Vote
+// @Accept application/json
+// @Produce json
+// @Success 200 {array} entityvote.VoteEntity
+// @Failure 400 {object} gofiberentities.ErrorResponseType
+// @Router /api/v1/votes [get]
+// @Param constituencyId query string true "Constituency Id"
+func (h *voteHandler) GetVotesByConstituencyId(c *fiber.Ctx) error {
+	// Parse request
+	var constituencyId = c.Params("id")
+	if constituencyId == "" {
+		return gofiberentities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			string(createVoteError),
+			"constituencyId is required",
+		).Response()
+	}
+
+	// Pass thorugh Use Case
+	constituencyIdUint, parseErr := strconv.ParseUint(constituencyId, 10, 32)
+	if parseErr != nil {
+		return gofiberentities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			string(createVoteError),
+			"Invalid candidate ID",
+		).Response()
+	}
+
+	// Get candidate by constituency id
+	var candidates, errorGetCandidate = h.candidateUsecase.GetCandidateByConstituencyId(uint(constituencyIdUint))
+	if errorGetCandidate != nil {
+		// get candidate error
+		return gofiberentities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			string(createVoteError),
+			errorGetCandidate.Error(),
+		).Response()
+	}
+
+	var getVotesByConstituencyIdResponse []entityvote.GetVotesByConstituencyIdResponse
+
+	// Each candidate
+	for _, candidate := range *candidates {
+		// Get votes count by candidate id
+		var votesCount, errorCount = h.voteUsecase.CountVoteByCandidateId(candidate.Id)
+		if errorCount != nil {
+			// count votes error
+			return gofiberentities.NewResponse(c).Error(
+				fiber.ErrBadRequest.Code,
+				string(createVoteError),
+				errorCount.Error(),
+			).Response()
+		}
+
+		getVotesByConstituencyIdResponse = append(getVotesByConstituencyIdResponse, entityvote.GetVotesByConstituencyIdResponse{
+			Candidate: candidate,
+			VoteCount: *votesCount,
+		})
+	}
+
+	// Return response
+	return gofiberentities.NewResponse(c).Success(fiber.StatusOK, getVotesByConstituencyIdResponse).Response()
 }
 
 // @Summary Create Vote

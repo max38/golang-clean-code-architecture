@@ -109,6 +109,7 @@ func (m *moduleFactory) VoteModule() {
 
 	var router = m.router.Group("/votes")
 
+	router.Get("/constituency/:id", m.middlewares.JwtAuth(m.server.application.UserUsecase), voteHandler.GetVotesByConstituencyId)
 	router.Post("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), voteHandler.CreateVote)
 }
 
