@@ -8,6 +8,7 @@ import (
 	gofibercrudhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/crud"
 	gofibermonitorhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/monitor"
 	gofiberuserhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/user"
+	gofibervotehandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/vote"
 
 	// Replace this with your own docs package
 	_ "github.com/max38/golang-clean-code-architecture/src/infrastructure/gofiber/docs"
@@ -18,6 +19,7 @@ type IModuleFactory interface {
 	UsersModule()
 	ConstituencyModule()
 	CandidateModule()
+	VoteModule()
 	SwaggerModule()
 	CRUDModule()
 }
@@ -100,6 +102,14 @@ func (m *moduleFactory) CandidateModule() {
 	router.Post("/", candidateHandler.CreateCandidate)
 	router.Put("/", candidateHandler.UpdateCandidate)
 	router.Delete("/:id", candidateHandler.DeleteCandidate)
+}
+
+func (m *moduleFactory) VoteModule() {
+	var voteHandler = gofibervotehandler.VoteHandler(m.server.application.VoteUsecase, m.server.application.CandidateUsecase)
+
+	var router = m.router.Group("/votes")
+
+	router.Post("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), voteHandler.CreateVote)
 }
 
 func (m *moduleFactory) CRUDModule() {

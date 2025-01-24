@@ -7,9 +7,11 @@ import (
 	postgrescandidaterepository "github.com/max38/golang-clean-code-architecture/src/interface/repositories/postgres/candidate"
 	postgresconstituencyrepository "github.com/max38/golang-clean-code-architecture/src/interface/repositories/postgres/constituency"
 	postgresuserrepository "github.com/max38/golang-clean-code-architecture/src/interface/repositories/postgres/user"
+	postgresvoterepository "github.com/max38/golang-clean-code-architecture/src/interface/repositories/postgres/vote"
 	candidateusecase "github.com/max38/golang-clean-code-architecture/src/usecases/candidate"
 	constituencyusecase "github.com/max38/golang-clean-code-architecture/src/usecases/constituency"
 	userusecase "github.com/max38/golang-clean-code-architecture/src/usecases/user"
+	voteusecase "github.com/max38/golang-clean-code-architecture/src/usecases/vote"
 )
 
 // @title Training Kawaii Shop API
@@ -37,10 +39,15 @@ func main() {
 	var candidateRepository = postgrescandidaterepository.CandidateRepository()
 	var candidateUsecase = candidateusecase.CandidateUsecase(candidateRepository)
 
+	// Vote
+	var voteRepository = postgresvoterepository.VoteRepository()
+	var voteUsecase = voteusecase.VoteUsecase(voteRepository)
+
 	var applicationEntity = entities.ApplicationEntity{
 		UserUsecase:         userUsecase,
 		ConstituencyUsecase: constituencyUsecase,
 		CandidateUsecase:    candidateUsecase,
+		VoteUsecase:         voteUsecase,
 	}
 
 	var server gofiberserver.IServer = gofiberserver.NewServer(applicationEntity)
