@@ -45,6 +45,9 @@ func (s *gofiberServer) Start() {
 	var modules = InitModule(routerGroupApiV1, s, middlewares)
 	modules.MonitorModule()
 	modules.UsersModule()
+	modules.ConstituencyModule()
+	modules.CandidateModule()
+	modules.VoteModule()
 	modules.SwaggerModule()
 	modules.CRUDModule()
 

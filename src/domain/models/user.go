@@ -9,7 +9,8 @@ import (
 
 type UserModel struct {
 	entityuser.UserEntity
-	Password string `db:"password" json:"-"`
+	Password     string            `db:"password" json:"-"`
+	Constituency ConstituencyModel `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"constituency"`
 }
 
 func (u *UserModel) TableName() string {

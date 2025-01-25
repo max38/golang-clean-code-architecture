@@ -23,9 +23,10 @@ func (u *userRepository) InsertUser(userRegisterRequest *entityuser.UserRegister
 
 	var userModel = entitymodels.UserModel{
 		UserEntity: entityuser.UserEntity{
-			Email:     userRegisterRequest.Email,
-			FirstName: userRegisterRequest.FirstName,
-			LastName:  userRegisterRequest.LastName,
+			Email:          userRegisterRequest.Email,
+			FirstName:      userRegisterRequest.FirstName,
+			LastName:       userRegisterRequest.LastName,
+			ConstituencyId: userRegisterRequest.ConstituencyId,
 		},
 		Password: userRegisterRequest.Password,
 	}

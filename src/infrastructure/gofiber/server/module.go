@@ -3,9 +3,12 @@ package gofiberserver
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	gofibercandidatehandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/candidate"
+	gofiberconstituencyhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/constituency"
 	gofibercrudhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/crud"
 	gofibermonitorhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/monitor"
 	gofiberuserhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/user"
+	gofibervotehandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/vote"
 
 	// Replace this with your own docs package
 	_ "github.com/max38/golang-clean-code-architecture/src/infrastructure/gofiber/docs"
@@ -14,6 +17,9 @@ import (
 type IModuleFactory interface {
 	MonitorModule()
 	UsersModule()
+	ConstituencyModule()
+	CandidateModule()
+	VoteModule()
 	SwaggerModule()
 	CRUDModule()
 }
@@ -70,6 +76,41 @@ func (m *moduleFactory) UsersModule() {
 
 	router.Post("/profile", m.middlewares.JwtAuth(m.server.application.UserUsecase), userHandler.GetUserProfile)
 
+}
+
+func (m *moduleFactory) ConstituencyModule() {
+	var constituencyHandler = gofiberconstituencyhandler.ConstituencyHandler(m.server.application.ConstituencyUsecase)
+
+	var router = m.router.Group("/constituencies")
+
+	router.Get("/", constituencyHandler.GetConstituencies)
+	router.Get("/:id", constituencyHandler.GetConstituencyByConstituencyId)
+	router.Post("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), constituencyHandler.CreateConstituency)
+	router.Put("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), constituencyHandler.UpdateConstituency)
+	router.Delete("/:id", m.middlewares.JwtAuth(m.server.application.UserUsecase), constituencyHandler.DeleteConstituency)
+}
+
+func (m *moduleFactory) CandidateModule() {
+
+	var candidateHandler = gofibercandidatehandler.CandidateHandler(m.server.application.CandidateUsecase)
+
+	var router = m.router.Group("/candidates")
+
+	router.Get("/", candidateHandler.GetCandidates)
+	router.Get("/:id", candidateHandler.GetCandidateByCandidateId)
+	router.Get("/constituency/:id", candidateHandler.GetCandidatesByConstituencyId)
+	router.Post("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), candidateHandler.CreateCandidate)
+	router.Put("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), candidateHandler.UpdateCandidate)
+	router.Delete("/:id", m.middlewares.JwtAuth(m.server.application.UserUsecase), candidateHandler.DeleteCandidate)
+}
+
+func (m *moduleFactory) VoteModule() {
+	var voteHandler = gofibervotehandler.VoteHandler(m.server.application.VoteUsecase, m.server.application.CandidateUsecase)
+
+	var router = m.router.Group("/votes")
+
+	router.Get("/constituency/:id", voteHandler.GetVotesByConstituencyId)
+	router.Post("/", m.middlewares.JwtAuth(m.server.application.UserUsecase), voteHandler.CreateVote)
 }
 
 func (m *moduleFactory) CRUDModule() {
