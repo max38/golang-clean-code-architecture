@@ -37,12 +37,12 @@ func InitMiddlewares() IMiddlewares {
 func (h *middlewares) Cors() fiber.Handler {
 	return cors.New(cors.Config{
 		Next:             cors.ConfigDefault.Next,
-		AllowOrigins:     "*",
+		AllowOrigins:     "http://127.0.0.1:3000",
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH",
-		AllowHeaders:     "",
-		AllowCredentials: false,
-		ExposeHeaders:    "",
-		MaxAge:           0,
+		AllowHeaders:     "Content-Type, Authorization",
+		AllowCredentials: true,
+		ExposeHeaders:    "X-Custom-Header",
+		MaxAge:           86400,
 	})
 }
 
@@ -59,7 +59,7 @@ func (h *middlewares) RouterCheck() fiber.Handler {
 		return gofiberentities.NewResponse(c).Error(
 			fiber.ErrNotFound.Code,
 			string(routerCheckError),
-			"rotuer not found",
+			"router not found",
 		).Response()
 	}
 }
@@ -74,7 +74,7 @@ func (h *middlewares) JwtAuth(userUsecase userusecase.IUserUsecase) fiber.Handle
 			return gofiberentities.NewResponse(c).Error(
 				fiber.ErrUnauthorized.Code,
 				string(jwtAuthError),
-				errorAuthentication.Error(),
+				"invalid token or token expired",
 			).Response()
 		}
 		// Set User

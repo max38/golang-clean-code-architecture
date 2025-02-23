@@ -1,6 +1,8 @@
 package crudusecase
 
 import (
+	"fmt"
+
 	entities "github.com/max38/golang-clean-code-architecture/src/domain/entities/crud"
 	entitymodels "github.com/max38/golang-clean-code-architecture/src/domain/models"
 	crudrepository "github.com/max38/golang-clean-code-architecture/src/interface/repositories/crud"
@@ -49,22 +51,45 @@ func (c *crudUsecase) RetriveList(userPermissionModel *entitymodels.UserPermissi
 	}
 	return crudRepository.GetList(pageNumber, pageSize, filter)
 }
-
 func (c *crudUsecase) Create(userPermissionModel *entitymodels.UserPermissionModel, entityModelSlug string, entityModel interface{}) (interface{}, error) {
-	return nil, nil
-	// var crudRepository, errorInit = crudrepository.GetCRUDRepository(entityModelSlug)
-	// if errorInit != nil {
-	// 	return nil, errorInit
-	// }
-	// return crudRepository.Create(entityModel)
+	crudRepository, errorInit := crudrepository.GetCRUDRepository(entityModelSlug)
+	if errorInit != nil {
+		return nil, errorInit
+	}
+
+	if crudDataModel, ok := entityModel.(*entities.ICRUDDataModel); ok {
+		return crudRepository.Create(crudDataModel)
+	} else {
+
+		return nil, fmt.Errorf("invalid type: expected *entities.ICRUDDataModel, got %T", entityModel)
+	}
 }
 
 func (c *crudUsecase) Update(userPermissionModel *entitymodels.UserPermissionModel, entityModelSlug string, entityModel interface{}) (interface{}, error) {
-	return nil, nil
+	var crudRepository, errorInit = crudrepository.GetCRUDRepository(entityModelSlug)
+	if errorInit != nil {
+		return nil, errorInit
+	}
+
+	switch v := entityModel.(type) {
+	case *entities.ICRUDDataModel:
+		return crudRepository.Update(v)
+	default:
+		return nil, fmt.Errorf("invalid entity model type")
+	}
 }
 
 func (c *crudUsecase) Delete(userPermissionModel *entitymodels.UserPermissionModel, entityModelSlug string, entityModel interface{}) error {
-	return nil
+	var crudRepository, errorInit = crudrepository.GetCRUDRepository(entityModelSlug)
+	if errorInit != nil {
+		return errorInit
+	}
+	switch v := entityModel.(type) {
+	case *entities.ICRUDDataModel:
+		return crudRepository.Delete(v)
+	default:
+		return fmt.Errorf("invalid entity model type for delete")
+	}
 }
 
 func (c *crudUsecase) DescribeDataSource(entityModelSlug string, schema string) (map[string]interface{}, error) {

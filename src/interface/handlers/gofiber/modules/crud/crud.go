@@ -19,13 +19,13 @@ type ICRUDHandler interface {
 }
 
 type crudHandler struct {
-	// crudUsecase *crudusecase.ICRUDUsecase
+	crudUsecase crudusecase.ICRUDUsecase
 }
 
 func CRUDHandler() ICRUDHandler {
-	// var crudUsecase = crudusecase.CrudUsecase()
+	var crudUsecase = crudusecase.CrudUsecase()
 	return &crudHandler{
-		// crudUsecase: &crudUsecase,
+		crudUsecase: crudUsecase,
 	}
 }
 
@@ -33,10 +33,16 @@ func (h *crudHandler) Retrive(c *fiber.Ctx) error {
 	var entityModelSlug = strings.Trim(c.Params("entity_model_slug"), " ")
 	var entityId = c.Params("id")
 
-	var modifierUserPermission = c.Locals("user_permission").(*entitymodels.UserPermissionModel)
+	var modifierUserPermission, ok = c.Locals("user_permission").(*entitymodels.UserPermissionModel)
+	if !ok {
+		return gofiberentities.NewResponse(c).Error(
+			fiber.ErrUnauthorized.Code,
+			"unauthorized",
+			"User permission not found",
+		).Response()
+	}
 
-	var crudUsecase = crudusecase.CrudUsecase()
-	var responseData, errorRetrive = crudUsecase.Retrive(modifierUserPermission, entityModelSlug, entityId)
+	var responseData, errorRetrive = h.crudUsecase.Retrive(modifierUserPermission, entityModelSlug, entityId)
 
 	if errorRetrive != nil {
 		return gofiberentities.NewResponse(c).Error(
@@ -51,7 +57,14 @@ func (h *crudHandler) Retrive(c *fiber.Ctx) error {
 func (h *crudHandler) RetriveList(c *fiber.Ctx) error {
 	var entityModelSlug = strings.Trim(c.Params("entity_model_slug"), " ")
 
-	var modifierUserPermission = c.Locals("user_permission").(*entitymodels.UserPermissionModel)
+	var modifierUserPermission, ok = c.Locals("user_permission").(*entitymodels.UserPermissionModel)
+	if !ok {
+		return gofiberentities.NewResponse(c).Error(
+			fiber.ErrUnauthorized.Code,
+			"unauthorized",
+			"User permission not found",
+		).Response()
+	}
 
 	queryParams := make(map[string]interface{})
 	for key, value := range c.Queries() {
@@ -62,19 +75,32 @@ func (h *crudHandler) RetriveList(c *fiber.Ctx) error {
 	if queryParams["_page"] != nil {
 		if intValue, err := strconv.Atoi(queryParams["_page"].(string)); err == nil {
 			page = intValue
-			delete(queryParams, "_page")
+		} else {
+			// อาจจะคืนข้อผิดพลาดในกรณีที่พยายามแปลงเป็นตัวเลขไม่ได้
+			return gofiberentities.NewResponse(c).Error(
+				fiber.ErrBadRequest.Code,
+				"invalid page parameter",
+				"Page parameter should be a valid number",
+			).Response()
 		}
+		delete(queryParams, "_page")
 	}
+
 	var pageSize = 10
 	if queryParams["_pageSize"] != nil {
 		if intValue, err := strconv.Atoi(queryParams["_pageSize"].(string)); err == nil {
 			pageSize = intValue
-			delete(queryParams, "_pageSize")
+		} else {
+			return gofiberentities.NewResponse(c).Error(
+				fiber.ErrBadRequest.Code,
+				"invalid page size parameter",
+				"Page size parameter should be a valid number",
+			).Response()
 		}
+		delete(queryParams, "_pageSize")
 	}
 
-	var crudUsecase = crudusecase.CrudUsecase()
-	var responseData, errorRetrive = crudUsecase.RetriveList(modifierUserPermission, entityModelSlug, page, pageSize, nil)
+	var responseData, errorRetrive = h.crudUsecase.RetriveList(modifierUserPermission, entityModelSlug, page, pageSize, nil)
 
 	if errorRetrive != nil {
 		return gofiberentities.NewResponse(c).Error(
@@ -89,8 +115,8 @@ func (h *crudHandler) RetriveList(c *fiber.Ctx) error {
 func (h *crudHandler) Describe(c *fiber.Ctx) error {
 	var entityModelSlug = strings.Trim(c.Params("entity_model_slug"), " ")
 	var schema = strings.Trim(c.Params("schema"), " ")
-	var crudUsecase = crudusecase.CrudUsecase()
-	var responseData, errorRetrive = crudUsecase.DescribeDataSource(entityModelSlug, schema)
+
+	var responseData, errorRetrive = h.crudUsecase.DescribeDataSource(entityModelSlug, schema)
 
 	if errorRetrive != nil {
 		return gofiberentities.NewResponse(c).Error(

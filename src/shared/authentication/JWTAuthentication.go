@@ -3,7 +3,6 @@ package authentication
 import (
 	"errors"
 	"fmt"
-	"math"
 	"strings"
 	"time"
 
@@ -88,7 +87,7 @@ func newRefreshToken(claims *entityuser.UserTokenClaimsEntity) IJWTAuthenticatio
 
 func getIssuerName() string {
 	var applicatiobName = config.Config.String("GOAPP_NAME")
-	strings.Replace(applicatiobName, " ", "-", -1)
+	applicatiobName = strings.Replace(applicatiobName, " ", "-", -1)
 	applicatiobName = strings.ToLower(applicatiobName)
 	return applicatiobName
 }
@@ -99,7 +98,7 @@ func getSecretKey() *[]byte {
 }
 
 func jwtTimeDurationCalculation(t int) *jwt.NumericDate {
-	return jwt.NewNumericDate(time.Now().Add(time.Duration(int64(t) * int64(math.Pow10(9)))))
+	return jwt.NewNumericDate(time.Now().Add(time.Duration(t) * time.Second))
 }
 
 func jwtTimeRepeatAdapter(t int64) *jwt.NumericDate {
