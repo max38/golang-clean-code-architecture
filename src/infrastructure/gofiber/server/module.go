@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 	gofibercrudhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/crud"
+	gofiberelectionhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/election"
 	gofibermonitorhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/monitor"
 	gofiberuserhandler "github.com/max38/golang-clean-code-architecture/src/interface/handlers/gofiber/modules/user"
 
@@ -16,6 +17,7 @@ type IModuleFactory interface {
 	UsersModule()
 	SwaggerModule()
 	CRUDModule()
+	ElectionModule()
 }
 
 type moduleFactory struct {
@@ -33,7 +35,7 @@ func InitModule(router fiber.Router, server *gofiberServer, middlewares IMiddlew
 }
 
 func (m *moduleFactory) MonitorModule() {
-	var monitorHandler = gofibermonitorhandler.MonitorHandler()
+	monitorHandler := gofibermonitorhandler.MonitorHandler()
 
 	m.router.Get("/", monitorHandler.HealthCheck)
 }
@@ -59,9 +61,9 @@ func (m *moduleFactory) SwaggerModule() {
 func (m *moduleFactory) UsersModule() {
 	// var userRepository = postgresuserrepository.UserRepository()
 	// var userUsecase = userusecase.UserUsecase(m.server.userRepository)
-	var userHandler = gofiberuserhandler.UserHandler(m.server.application.UserUsecase)
+	userHandler := gofiberuserhandler.UserHandler(m.server.application.UserUsecase)
 
-	var router = m.router.Group("/users")
+	router := m.router.Group("/users")
 
 	router.Post("/register", userHandler.RegisterUser)
 	router.Post("/login", userHandler.UserLogin)
@@ -69,13 +71,20 @@ func (m *moduleFactory) UsersModule() {
 	router.Post("/refresh-token", userHandler.RefreshToken)
 
 	router.Post("/profile", m.middlewares.JwtAuth(m.server.application.UserUsecase), userHandler.GetUserProfile)
-
 }
 
 func (m *moduleFactory) CRUDModule() {
-	var router = m.router.Group("/data")
-	var crudHandler = gofibercrudhandler.CRUDHandler()
+	router := m.router.Group("/data")
+	crudHandler := gofibercrudhandler.CRUDHandler()
 	router.Get("/:entity_model_slug/describe", m.middlewares.JwtAuth(m.server.application.UserUsecase), crudHandler.Describe)
 	router.Get("/:entity_model_slug/", m.middlewares.JwtAuth(m.server.application.UserUsecase), crudHandler.RetriveList)
 	router.Get("/:entity_model_slug/:id", m.middlewares.JwtAuth(m.server.application.UserUsecase), crudHandler.Retrive)
+}
+
+func (m *moduleFactory) ElectionModule() {
+	router := m.router.Group("/election")
+	electionHandler := gofiberelectionhandler.ElectionHandler(m.server.application.ElectionUsecase)
+	router.Post("/result", electionHandler.NewResult)
+	router.Get("/result/:id", electionHandler.GetResult)
+	router.Get("/scoreboard", electionHandler.Scoreboard)
 }
